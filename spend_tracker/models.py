@@ -5,7 +5,7 @@ from spendlog import settings
 
 class Currency(models.Model):
     name = models.CharField(max_length=3, unique=True)
-    rate = models.DecimalField(max_digits=16, decimal_places=2)
+    rate = models.DecimalField(max_digits=22, decimal_places=6)
 
     def __str__(self):
         return self.name
