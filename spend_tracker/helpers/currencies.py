@@ -3,10 +3,14 @@ import os
 import requests
 
 from spend_tracker.models import Currency
+from dotenv import load_dotenv
 
 
-url = os.environ.get("EXCHANGE_RATES_API_URL")
-access_key = os.environ.get("EXCHANGE_RATES_API_ACCESS_KEY")
+load_dotenv()
+
+
+url = os.getenv("EXCHANGE_RATES_API_URL")
+access_key = os.getenv("EXCHANGE_RATES_API_ACCESS_KEY")
 
 
 def get_currencies_from_api() -> dict | None:
