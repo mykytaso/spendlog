@@ -2,6 +2,7 @@ import os
 
 import requests
 
+from spend_tracker.helpers.telegram import send_telegram_message
 from spend_tracker.models import Currency
 from dotenv import load_dotenv
 
@@ -26,6 +27,9 @@ def update_or_create_currencies_in_db() -> None:
             Currency.objects.update_or_create(
                 name=currency_name, defaults={"rate": currency_rate}
             )
+        send_telegram_message("Currencies updated")
+    else:
+        send_telegram_message("Currencies NOT updated")
 
 
 def convert_currencies(from_currency, to_currency, amount):
