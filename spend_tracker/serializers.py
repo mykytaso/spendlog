@@ -1,6 +1,7 @@
 from django.db import models
 from rest_framework import serializers
 
+from spend_tracker.helpers.currencies import convert_currencies
 from spend_tracker.models import Currency, Unit, Transaction, DefaultCurrency
 
 
@@ -81,7 +82,14 @@ class TransactionSerializer(serializers.ModelSerializer):
     # If destination_amount is not provided, set it equal to source_amount or convert to destination unit currency
     def validate(self, data):
         if "destination_amount" not in data or data["destination_amount"] is None:
-            data["destination_amount"] = data.get("source_amount", 0)
+            if data["source_unit"].currency == data["destination_unit"].currency:
+                data["destination_amount"] = data["source_amount"]
+            else:
+                data["destination_amount"] = convert_currencies(
+                    data["source_unit"].currency.name,
+                    data["destination_unit"].currency.name,
+                    data["source_amount"],
+                )
         return data
 
 
