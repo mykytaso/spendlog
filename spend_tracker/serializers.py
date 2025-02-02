@@ -33,8 +33,8 @@ class UnitSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "amount", "unit_type", "currency", "in_balance", "user")
         read_only_fields = ("user",)
 
+    # Reorder currency choices so the default currency appears first
     def __init__(self, *args, **kwargs):
-        """Reorder currency choices so the default currency appears first"""
         super().__init__(*args, **kwargs)
 
         user = self.context["request"].user
@@ -69,7 +69,16 @@ class TransactionSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("user",)
 
-    # If destination_amount is not provided, set it equal to source_amount
+    # Shows only units which belong to user
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            user_units = Unit.objects.filter(user=request.user).order_by("unit_type")
+            self.fields["source_unit"].queryset = user_units
+            self.fields["destination_unit"].queryset = user_units
+
+    # If destination_amount is not provided, set it equal to source_amount or convert to destination unit currency
     def validate(self, data):
         if "destination_amount" not in data or data["destination_amount"] is None:
             data["destination_amount"] = data.get("source_amount", 0)
