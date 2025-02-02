@@ -1,5 +1,6 @@
 import decimal
 import os
+from datetime import datetime
 
 import requests
 
@@ -30,9 +31,13 @@ def update_or_create_currencies_in_db() -> None:
             Currency.objects.update_or_create(
                 name=currency_name, defaults={"rate": currency_rate}
             )
-        send_telegram_message("Currencies updated")
+        send_telegram_message(
+            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\nCurrencies Updated"
+        )
     else:
-        send_telegram_message("Currencies NOT updated")
+        send_telegram_message(
+            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\nCurrencies NOT Updated"
+        )
 
 
 def convert_currencies(
