@@ -61,4 +61,6 @@ class Transaction(models.Model):
     )
 
     def __str__(self):
-        return f"{self.user.email} | {self.source_amount} {self.source_unit.currency.name} | {self.source_unit.name} -> {self.destination_unit.name}"
+        return (f"{self.user.email} | "
+                f"{self.source_amount} {self.source_unit.currency.name} | "
+                f"{self.source_unit.name} -> {self.destination_unit.name}")
