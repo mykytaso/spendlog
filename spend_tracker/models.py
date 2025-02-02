@@ -15,6 +15,9 @@ class DefaultCurrency(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     default_currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f"{self.user.email}: {self.default_currency.name}"
+
 
 class Unit(models.Model):
     UNIT_TYPE_CHOICES = [
@@ -40,7 +43,7 @@ class Unit(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.unit_type}: {self.name}"
+        return f"{self.unit_type} | {self.name} | {self.currency.name}"
 
 
 class Transaction(models.Model):
@@ -56,3 +59,6 @@ class Transaction(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="transactions"
     )
+
+    def __str__(self):
+        return f"{self.user.email} | {self.source_amount} {self.source_unit.currency.name} | {self.source_unit.name} -> {self.destination_unit.name}"
