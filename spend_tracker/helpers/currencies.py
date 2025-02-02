@@ -43,17 +43,8 @@ def update_or_create_currencies_in_db() -> None:
 def convert_currencies(
     from_currency: str, to_currency: str, amount: decimal.Decimal
 ) -> decimal.Decimal:
-
-    if not (len(from_currency) == len(to_currency) == 3):
-        return decimal.Decimal(0)
-
-    from_currency_upper = from_currency.upper()
-    to_currency_upper = to_currency.upper()
-
     rates = get_currencies_from_api()
-
-    if not rates or from_currency_upper not in rates or to_currency_upper not in rates:
+    if not rates or from_currency not in rates or to_currency not in rates:
         return decimal.Decimal(0)
-
-    rate = decimal.Decimal(rates[to_currency_upper] / rates[from_currency_upper])
-    return round(amount * rate, 3)
+    target_rate = decimal.Decimal(rates[to_currency] / rates[from_currency])
+    return amount * target_rate
