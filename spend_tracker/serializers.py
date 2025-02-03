@@ -94,6 +94,7 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 
 class TransactionListSerializer(TransactionSerializer):
+    date_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
     user = serializers.StringRelatedField()
     source_unit = serializers.StringRelatedField()
     destination_unit = serializers.StringRelatedField()
