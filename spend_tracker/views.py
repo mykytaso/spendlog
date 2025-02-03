@@ -85,33 +85,31 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
     @transaction.atomic
     def perform_create(self, serializer):
-
         data = serializer.validated_data
-
-        source_unit = Unit.objects.get(pk=data["source_unit"].id)
-        destination_unit = Unit.objects.get(pk=data["destination_unit"].id)
 
         # Operation for INCOME -> ACCOUNT
         if (
-            source_unit.unit_type == "INCOME"
-            and destination_unit.unit_type == "ACCOUNT"
+            data["source_unit"].unit_type == "INCOME"
+            and data["destination_unit"].unit_type == "ACCOUNT"
         ):
-            source_unit.amount += data["source_amount"]
-            destination_unit.amount += data["destination_amount"]
+            data["source_unit"].amount += data["source_amount"]
+            data["destination_unit"].amount += data["destination_amount"]
 
         # Operation for ACCOUNT -> ACCOUNT/EXPENSE
-        elif source_unit.unit_type == "ACCOUNT" and destination_unit.unit_type in (
+        elif data["source_unit"].unit_type == "ACCOUNT" and data[
+            "destination_unit"
+        ].unit_type in (
             "ACCOUNT",
             "EXPENSE",
         ):
-            source_unit.amount -= data["source_amount"]
-            destination_unit.amount += data["destination_amount"]
+            data["source_unit"].amount -= data["source_amount"]
+            data["destination_unit"].amount += data["destination_amount"]
 
         else:
             raise ValidationError("Invalid transaction type combination.")
 
-        source_unit.save()
-        destination_unit.save()
+        data["source_unit"].save()
+        data["destination_unit"].save()
 
         serializer.save(user=self.request.user)
 
