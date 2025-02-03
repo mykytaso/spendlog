@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 
 import requests
+from rest_framework.exceptions import ValidationError
 
 from spend_tracker.helpers.telegram import send_telegram_message
 from spend_tracker.models import Currency
@@ -45,6 +46,6 @@ def convert_currencies(
 ) -> decimal.Decimal:
     rates = get_currencies_from_api()
     if not rates or from_currency not in rates or to_currency not in rates:
-        return decimal.Decimal(0)
+        raise ValidationError(f"Currency convertion failed")
     target_rate = decimal.Decimal(rates[to_currency] / rates[from_currency])
     return amount * target_rate
