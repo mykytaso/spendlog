@@ -114,6 +114,40 @@ class TransactionViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     @transaction.atomic
+    def perform_update(self, serializer):
+
+        data = serializer.validated_data
+        instance = serializer.instance
+
+        source_difference = instance.source_amount - data["source_amount"]
+        destination_difference = (
+            instance.destination_amount - data["destination_amount"]
+        )
+
+        # Operation for INCOME -> ACCOUNT
+        if (
+            data["source_unit"].unit_type == "INCOME"
+            and data["destination_unit"].unit_type == "ACCOUNT"
+        ):
+            data["source_unit"].amount -= source_difference
+            data["destination_unit"].amount -= destination_difference
+
+        # Operation for ACCOUNT -> ACCOUNT/EXPENSE
+        elif data["source_unit"].unit_type == "ACCOUNT" and data[
+            "destination_unit"
+        ].unit_type in (
+            "ACCOUNT",
+            "EXPENSE",
+        ):
+            data["source_unit"].amount += source_difference
+            data["destination_unit"].amount -= destination_difference
+
+        data["source_unit"].save()
+        data["destination_unit"].save()
+
+        serializer.save()
+
+    @transaction.atomic
     def perform_destroy(self, instance):
         if instance.source_unit.unit_type == "INCOME":
             instance.source_unit.amount -= instance.source_amount
