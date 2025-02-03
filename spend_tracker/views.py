@@ -114,3 +114,16 @@ class TransactionViewSet(viewsets.ModelViewSet):
         destination_unit.save()
 
         serializer.save(user=self.request.user)
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        if instance.source_unit.unit_type == "INCOME":
+            instance.source_unit.amount -= instance.source_amount
+            instance.destination_unit.amount -= instance.destination_amount
+        else:
+            instance.source_unit.amount += instance.source_amount
+            instance.destination_unit.amount -= instance.destination_amount
+
+        instance.source_unit.save()
+        instance.destination_unit.save()
+        instance.delete()
