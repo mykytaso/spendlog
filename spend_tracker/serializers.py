@@ -86,9 +86,9 @@ class TransactionSerializer(serializers.ModelSerializer):
                 data["destination_amount"] = data["source_amount"]
             else:
                 data["destination_amount"] = convert_currencies(
-                    data["source_unit"].currency.name,
-                    data["destination_unit"].currency.name,
-                    data["source_amount"],
+                    from_currency=data["source_unit"].currency.name,
+                    to_currency=data["destination_unit"].currency.name,
+                    amount=data["source_amount"],
                 )
         return data
 
