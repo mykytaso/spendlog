@@ -21,8 +21,7 @@ def get_currencies_from_api() -> dict | None:
     response = requests.get(url, params={"access_key": access_key})
     if response.status_code != 200:
         return None
-    currencies_from_api = response.json().get("rates", None)
-    return currencies_from_api
+    return response.json().get("rates", None)
 
 
 def update_or_create_currencies_in_db() -> None:
