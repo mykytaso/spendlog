@@ -79,17 +79,31 @@ class TransactionSerializer(serializers.ModelSerializer):
             self.fields["source_unit"].queryset = user_units
             self.fields["destination_unit"].queryset = user_units
 
-    # If destination_amount is not provided, set it equal to source_amount or convert to destination unit currency
     def validate(self, data):
-        if "destination_amount" not in data or data["destination_amount"] is None:
-            if data["source_unit"].currency == data["destination_unit"].currency:
-                data["destination_amount"] = data["source_amount"]
-            else:
-                data["destination_amount"] = convert_currencies(
-                    from_currency=data["source_unit"].currency.name,
-                    to_currency=data["destination_unit"].currency.name,
-                    amount=data["source_amount"],
-                )
+        """Validates and processes transaction data by ensuring either the source or
+        destination amount is provided and calculates the missing value if necessary."""
+        source_amount = data.get("source_amount")
+        source_currency = data.get("source_unit").currency
+        destination_amount = data.get("destination_amount")
+        destination_currency = data.get("destination_unit").currency
+
+        if data.get("destination_amount") is None and data.get("source_amount") is None:
+            raise serializers.ValidationError(
+                "You must specify a destination or source amount"
+            )
+
+        if source_amount and destination_amount is None:
+            data["destination_amount"] = convert_currencies(
+                amount=source_amount,
+                from_currency=source_currency,
+                to_currency=destination_currency,
+            )
+        elif destination_amount and source_amount is None:
+            data["source_amount"] = convert_currencies(
+                amount=destination_amount,
+                from_currency=destination_currency,
+                to_currency=source_currency,
+            )
         return data
 
 

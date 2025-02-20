@@ -54,8 +54,10 @@ class Transaction(models.Model):
     destination_unit = models.ForeignKey(
         Unit, on_delete=models.CASCADE, related_name="destination_transactions"
     )
-    source_amount = models.DecimalField(max_digits=16, decimal_places=2)
-    destination_amount = models.DecimalField(max_digits=16, decimal_places=2, null=True)
+    source_amount = models.DecimalField(max_digits=16, decimal_places=2, blank=True)
+    destination_amount = models.DecimalField(
+        max_digits=16, decimal_places=2, blank=True
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="transactions"
     )

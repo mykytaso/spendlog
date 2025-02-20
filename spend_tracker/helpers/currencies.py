@@ -18,14 +18,15 @@ access_key = os.getenv("EXCHANGE_RATES_API_ACCESS_KEY")
 
 
 def get_currencies_from_api() -> dict | None:
+    """Fetches currency exchange rates from an external API."""
     response = requests.get(url, params={"access_key": access_key})
     if response.status_code != 200:
         return None
-    currencies_from_api = response.json().get("rates", None)
-    return currencies_from_api
+    return response.json().get("rates", None)
 
 
 def update_or_create_currencies_in_db() -> None:
+    """Fetches currency rates from an external API and updates or creates currency records in the database."""
     currencies_from_api = get_currencies_from_api()
     if currencies_from_api:
         for currency_name, currency_rate in currencies_from_api.items():
@@ -42,10 +43,11 @@ def update_or_create_currencies_in_db() -> None:
 
 
 def convert_currencies(
-    from_currency: str, to_currency: str, amount: decimal.Decimal
+    amount: decimal.Decimal, from_currency: Currency, to_currency: Currency
 ) -> decimal.Decimal:
-    rates = get_currencies_from_api()
-    if not rates or from_currency not in rates or to_currency not in rates:
-        raise ValidationError(f"Currency convertion failed")
-    target_rate = decimal.Decimal(rates[to_currency] / rates[from_currency])
-    return amount * target_rate
+    """Converts a monetary amount from one currency to another.
+    If the source and target currencies are the same, the original amount is returned.
+    """
+    if from_currency == to_currency:
+        return amount
+    return amount * (to_currency.rate / from_currency.rate)
